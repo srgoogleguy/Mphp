@@ -407,6 +407,7 @@ class Parser
           if ($last &&
               $this->getOperatorPrecedence($token['tokenName']) <= $this->getOperatorPrecedence($last['tokenName']) &&
               $last['tokenName'] !== Parser::T_OPEN_BRACE &&
+              $token['tokenName'] !== Parser::T_NEG &&
               !empty($outputStack))
           {
             $outputStack[] = array_pop($operatorStack);
