@@ -1,10 +1,11 @@
 Mphp by Sherif Ramadan (http://sheriframadan.com/mphp).
 
-Mphp is an operator precedence parser written in PHP and designed as an experimental API.
-The library currently only includes a single class named Parser that can take any string
-made up of a valid mathematical expression and tokenize, lex, and execute the expression
-to provide the client with a finished result. The API also offers an option to access
-the stack array from the getStack method.
+Mphp is an operator precedence parser written in PHP and designed as an
+experimental API. The library currently only includes a single class named
+Parser that can take any string made up of a valid mathematical expression and
+tokenize, lex, and execute the expression to provide the client with a final
+result. The API also offers an option to access the stack array from the
+getStack method.
 
 The parser currently supports the following operators:
 
@@ -16,7 +17,8 @@ The parser currently supports the following operators:
     /    Division
     ^    Exponentiation
     
-The parser sets the following precedence on these operators from highest to lowest precedence:
+The parser sets the following precedence on these operators from lowest to
+highest precedence:
 
     Precedence    Operator(s)                     
     1             Addition, Subtraction
@@ -24,18 +26,23 @@ The parser sets the following precedence on these operators from highest to lowe
     3             Exponentiation
     4             Negation
 
-Operators with equal precedence are executed in the order they are defined. The parser also
-supports sub-group expressions denoted by opening and closing round braces (, ).
+Operators with equal precedence are executed in the order they are defined.
+The parser also supports sub-group expressions denoted by opening and closing
+round braces (, ).
 
    (1 + 2) * 3
    
-In the above example the round braces force addition to be carried out first even though
-multiplication has higher precedence. Precedence of operators is still maintained within every
-sub expression enclosed in opening and closing round braces.
+In the above example the round braces force addition to be carried out first
+even though multiplication has higher precedence in our precdence table.
+Precedence of operators is still maintained within every sub expression enclosed
+in opening and closing round braces.
 
-Any number value is allowed using digit characters 0 through 9 and optionally decimal values
-containing a single decimal place (denoted by '.') followed by any number of digit characters.
-Results have fixed precision based on PHP precision settings and no arbitrary precision can be
-guaranteed.
+Any number value is allowed using digit characters 0 through 9 and optionally
+decimal values containing a single decimal place (denoted by '.') followed by
+any number of digit characters. Results have fixed precision based on PHP
+precision settings and no arbitrary precision can be guaranteed.
 
-Future versions of the API may include the ability to use variable assignment and/or functions.
+Future versions of the API may include the ability to use variable assignment
+and/or functions.
+
+Please note that the API is currently expiremental and is likely to change.

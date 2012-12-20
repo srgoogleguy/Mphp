@@ -2,7 +2,7 @@
 /**
     @name:        Mphp
     @description: An operator precedence parser written in PHP that can parse simple/complex mathematical expressions.
-    @version:     1.0.0
+    @version:     1.0.1
     @author:      Sherif Ramadan
     @URL:         http://sheriframadan.com/mphp
 */
