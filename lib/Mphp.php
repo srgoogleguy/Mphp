@@ -398,7 +398,7 @@ class Parser
           }
         } while (!$brace);
       }
-      elseif ($token['tokenName'] >= Parser::T_ADD || $token['tokenName'] <= Parser::T_EXP)
+      elseif ($token['tokenName'] >= Parser::T_ADD && $token['tokenName'] <= Parser::T_EXP)
       {
         do
         {
