@@ -2,7 +2,7 @@
 /**
     @name:        Mphp
     @description: An operator precedence parser written in PHP that can parse simple/complex mathematical expressions.
-    @version:     1.0.1
+    @version:     1.1.0
     @author:      Sherif Ramadan
     @URL:         http://sheriframadan.com/mphp
 */
@@ -11,7 +11,7 @@ namespace Mphp;
 class Parser
 {
 
-  public $code = '';
+  protected $_code = '';
   private $tokenArray = array();
   private $opArray = array();
   private $stackFrame = array();
@@ -32,16 +32,37 @@ class Parser
   const OPERATOR_UNARY  = 2048;
   const RESULT          = -1;
 
-  public function __construct($code)
+  public function __construct($code = "")
   {
-    if (!is_string($code))
-    {
-      $type = gettype($code);
-      throw new \Exception("Parser expects first argument of the construct to be a string: {$type} given.");
-    }
     $this->code = $code;
   }
-  
+
+  public function __get($name)
+  {
+    if ($name == 'code')
+    {
+      return $this->_code;
+    } else {
+      return $this->$name;
+    }
+  }
+
+  public function __set($name, $value)
+  {
+    if ($name == 'code')
+    {
+      if (is_string($value))
+      {
+        $this->_code = $value;
+      } else {
+        $type = gettype($value);
+        throw new \Exception("Parser expects code argument to be of type string: {$type} given");
+      }
+    } else {
+      $this->$name = $value;
+    }
+  }
+
   public function Tokenize()
   {
     $this->tokenArray = array();
@@ -103,8 +124,8 @@ class Parser
                     $offset += 2;
                     throw new \Exception("Parse Error: Unexpected Token '{$this->code[$cursor+1]}' at offset $offset " .
                                         "on line $line. Expecting T_NUMBER.");
-                  } elseif ($cursor + 1 >= $len && (!in_array(ord($this->code[$cursor+1]), range(48,57)))) {
-                    $offset += 2;
+                  } elseif ($cursor + 1 >= $len && (!in_array(ord($this->code[$cursor]), range(48,57)))) {
+                    $offset++;
                     throw new \Exception("Parse Error: Unexpected END at offset $offset on line $line. ".
                                         "Expecting T_NUMBER.");
                   }
@@ -149,7 +170,7 @@ class Parser
                 /* We may not close a brace unless there is at least one expression group open */
                 if ($expressionGroup - 1 < 0)
                 {
-                  $tokenName = $this->getTokenName(Parser::T_OPEN_BRACE);
+                  $tokenName = $this->getTokenName(Parser::T_CLOSE_BRACE);
                   throw new \Exception("Parse Error: Unexpected Token '{$tokenName}' at offset $offset on line $line.");
                 }
                 $this->tokenArray[] = array(
@@ -333,7 +354,6 @@ class Parser
         $expect = array(
                         Parser::T_NUMBER,
                         Parser::T_DECIMAL,
-                        Parser::T_NEG,
                         Parser::T_OPEN_BRACE,
                        );
       }
@@ -354,7 +374,7 @@ class Parser
     {
       $expect = $this->checkExpect($token, $expect, $expressionGroup);
     }
-    if ($token['tokenName'] >= Parser::T_ADD && $token['tokenName'] <= Parser::T_EXP)
+    if (isset($token) && $token['tokenName'] >= Parser::T_ADD && $token['tokenName'] <= Parser::T_EXP)
     {
       if (!in_array($token['tokenName'], $expect)) {
         $expected = array_map(array($this, 'getTokenName'), $expect);
@@ -499,7 +519,17 @@ class Parser
         }
       }
     } while(key($stack) !== null);
+    $stack = array_filter($stack);
     $result = array_filter($stack, array($this, 'filterResult'));
+    if (empty($result) && !empty($stack))
+    {
+      if (count($stack) > 1)
+      {
+        throw new \Exception("Runtime Error: Malformed expression detected in stack!");
+      } else {
+        $result = $stack;
+      }
+    }
     $result = array_pop($result);
     $this->result = $result['token'];
     return $this;
@@ -526,10 +556,18 @@ class Parser
                           $this->stackFrame[] = "$operand2 * $operand1 = $r";
                           return $r;
       case Parser::T_MOD:
+                          if (floor(abs($operand1)) == 0)
+                          {
+                            throw new \Exception("Runtime Error: Division by zero!");
+                          }
                           $r = $operand2 % $operand1;
                           $this->stackFrame[] = "$operand2 % $operand1 = $r";
                           return $r;
       case Parser::T_DIV:
+                          if ($operand1 == 0)
+                          {
+                            throw new \Exception("Runtime Error: Division by zero!");
+                          }
                           $r = $operand2 / $operand1;
                           $this->stackFrame[] = "$operand2 / $operand1 = $r";
                           return $r;
@@ -681,4 +719,29 @@ class Parser
     }
   }
   
+}
+
+class Core extends Parser {
+
+  private $parser;
+
+  public function __construct()
+  {
+    $this->parser = new Parser;
+  } 
+
+  public function compute($code, $debug = false)
+  {
+    $this->parser->code = $code;
+    $this->parser->Tokenize()->Lex()->Executor($debug);
+    return $this->parser->getResult();
+  }
+  
+  public static function evaluate($code, $debug = false)
+  {
+    $parser = new Parser($code);
+    $parser->Tokenize()->Lex()->Executor($debug);
+    return $parser->getResult();
+  }
+
 }

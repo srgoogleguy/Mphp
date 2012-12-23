@@ -1,8 +1,21 @@
 Mphp NEWS
 --------------------------------------------------------------------------------
+22 Dec 2012, Mphp 1.1.0
+
+ - Fixed wrong token used in Parse error message for unexpected closing brace.
+ - Fixed Parser::Expect from expecting T_NEG after T_NEG (dangling operator).
+ - Added Runtime Errors for possibly malformed expressions and division by zero.
+ - Added new Core class with compute and static evaluate methods for ease.
+ - Added new examples for interactive shell processing and using new Core class.
+ - Updated README file. 
+
 20 Dec 2012, Mphp 1.0.1
 
  - Fixed token range check bug in lexer.
  - Fixed negation operator left associativity bug.
  - Fixed README file col width now set to 80 chars.
  - Added NEWS!
+
+19 Dec 2012, Mphp 1.0.0
+
+ - First release.

@@ -1,11 +1,24 @@
 Mphp by Sherif Ramadan (http://sheriframadan.com/mphp).
 
 Mphp is an operator precedence parser written in PHP and designed as an
-experimental API. The library currently only includes a single class named
-Parser that can take any string made up of a valid mathematical expression and
-tokenize, lex, and execute the expression to provide the client with a final
-result. The API also offers an option to access the stack array from the
-getStack method.
+experimental API. The library currently only includes a parser class named
+Parser and a core class named Core that extends the parser. The parser may be
+used independently, but the core mainly provides a thin wrapper over the parser
+functions that allow for ease of use.
+
+The Parser class has three main functions:
+   
+   - Tokenize
+   - Lex
+   - Executor
+
+These functions must be called in that order to compute a result for the code
+supplied to the parser. The Tokenize method creates a list of tokens for the
+code. The Lex method performs a lexical analysis on those tokens to make sure
+they can be run through the executor. The Executor method then builds stack
+frames for each operator and its operands in the stack array and computes the
+result of each, storing the final result in the parser's result register. This
+can be accessed via the getResult method from the parser.
 
 The parser currently supports the following operators:
 
@@ -33,7 +46,7 @@ round braces (, ).
    (1 + 2) * 3
    
 In the above example the round braces force addition to be carried out first
-even though multiplication has higher precedence in our precdence table.
+even though multiplication has higher precedence in our precedence table.
 Precedence of operators is still maintained within every sub expression enclosed
 in opening and closing round braces.
 
@@ -42,7 +55,41 @@ decimal values containing a single decimal place (denoted by '.') followed by
 any number of digit characters. Results have fixed precision based on PHP
 precision settings and no arbitrary precision can be guaranteed.
 
-Future versions of the API may include the ability to use variable assignment
-and/or functions.
+* Usage:
 
-Please note that the API is currently expiremental and is likely to change.
+    To use the API you can simply call the Core::evaluate() method with your
+    supplied mathematical expression. The method returns the result directly.
+    
+    Example: echo Mphp\Core::evaluate("1 + 2");
+    
+    To use the API as an instance of the core use the following:
+    
+    $Mphp = new Mphp\Core;
+    $Mphp->compute("1 + 2"); // outputs 3
+    
+    The main difference between the Core::compute() and Core::evaluate() methods
+    is that the Core::evaluate() method instantiates a new Parser object and
+    calls the Tokenize(), Lex(), Executor(), and getResult() methods on that
+    Parser object directly, returning the result. This method may be called
+    statically, but the Core::compute() method may not. The compute method
+    requires an instance and reuses the same Parser object that it instantiates
+    upon instantiating the Core class.
+    
+    To use the Parser as an instance without the core use the following:
+    
+    $parser = new Parser("1 + 2");
+    echo $parser->Tokenize()->Lex()->Executor()->getResult(); // outputs 3
+    
+    This is equivalent to simply calling the compute or evaluate methods
+    directly. However, if you instantiate the parser object on its own you must
+    remember to recall the Tokenize(), Lex(), and Executor() methods each
+    time you want to compute a new expression. The code maybe updated through
+    the Parser::$code public property.
+    
+    $parser->code = "3 + 4";
+    echo $parser->Tokenize()->Lex()->Executor()->getResult(); // outputs 7
+
+Future versions of the API may include the ability to use variable assignment
+and/or functions such as round, sqrt, log, ln, sin, cos, tan, and fact.
+
+Please note that the API is currently experimental and is likely to change.
